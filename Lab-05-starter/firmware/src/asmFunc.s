@@ -65,8 +65,49 @@ asmFunc:
      * Use it to test the C test code */
     
     /*** STUDENTS: Place your code BELOW this line!!! **************/
-
+    /*load our dividend and devisor from the registers set by the C test code*/
+    LDR r2, = dividend
+    STR r0, [r2]
+    LDR r2, = divisor
+    STR r1, [r2]
+    MOV r4, 0
+    LDR r2, = we_have_a_problem
+    STR r4, [r2]
+    LDR r2, = quotient
+    STR r4, [r2]
+    LDR r2, = mod
+    STR r4, [r2]
     
+    /*lab assignment says if either input is 0, then it is not valid. inputs are still in R0/R1 registers.*/
+    CMP r0, 0 /*compare r0, and 0*/
+    BEQ error /*check if equal flag is set, if so there is an error*/
+    CMP r1, 0
+    BEQ error
+    /*lets use r5 to store the quotent*/
+    mov r5, 0 /*make sure theres nothing in there*/
+    
+    loop:
+	CMP r0,r1
+	BCC cleanup /*used BCC as using a signed conditon leads to overflow flag issues when the input is greater than the highest signed number*/
+	ADD r5,r5,1
+	SUB r0,r0,r1
+	B loop
+    cleanup:
+	/*store the quotent*/
+	LDR r2, = quotient
+	STR r5, [r2]
+	/*store the mod/remainder*/
+	LDR r2, = mod
+	STR r0, [r2]
+	LDR r0, = quotient
+	B done
+    error:
+	LDR r2, = we_have_a_problem
+	MOV r3, 1
+	STR r3, [r2] /*set we have a problem to 1 as specified by the lab*/
+	LDR r0, = quotient /* Set r0 to the mem location of the quotent as specified by the lab*/
+	B done
+	
     /*** STUDENTS: Place your code ABOVE this line!!! **************/
 
 done:    
