@@ -70,28 +70,30 @@ asmFunc:
     STR r0, [r2]
     LDR r2, = divisor
     STR r1, [r2]
-    MOV r4, 0
+    MOV r4, 0 /*set r4 to 0 so we can use to to make sure quotent and mod are cleared*/
     LDR r2, = we_have_a_problem
     STR r4, [r2]
     LDR r2, = quotient
     STR r4, [r2]
     LDR r2, = mod
     STR r4, [r2]
+
     
     /*lab assignment says if either input is 0, then it is not valid. inputs are still in R0/R1 registers.*/
     CMP r0, 0 /*compare r0, and 0*/
-    BEQ error /*check if equal flag is set, if so there is an error*/
-    CMP r1, 0
-    BEQ error
+    BEQ error /*check if equal to 0, if so there is an error as defined by lab*/
+    CMP r1, 0  /*compare r0, and 0*/
+    BEQ error /*check if equal to 0, if so there is an error as defined by lab*/
     /*lets use r5 to store the quotent*/
-    mov r5, 0 /*make sure theres nothing in there*/
+    mov r5, 0 /*make sure theres nothing in there before we start incrementing it*/
     
+    /*loop based on the flowchart in the lecture slides*/
     loop:
 	CMP r0,r1
-	BCC cleanup /*used BCC as using a signed conditon leads to overflow flag issues when the input is greater than the highest signed number*/
-	ADD r5,r5,1
-	SUB r0,r0,r1
-	B loop
+	BCC cleanup /*check if r0 is less than r1. if so jump to cleanup. used BCC as we are working with unsigned integers */
+	ADD r5,r5,1 /*increment our quotient*/
+	SUB r0,r0,r1 /* subtract the divisor from the divedned*/
+	B loop /*go back to the start*/
     cleanup:
 	/*store the quotent*/
 	LDR r2, = quotient
@@ -99,11 +101,13 @@ asmFunc:
 	/*store the mod/remainder*/
 	LDR r2, = mod
 	STR r0, [r2]
+	/*set r0 to the memory address of the quotient*/
 	LDR r0, = quotient
 	B done
+    /*set our error condition*/
     error:
-	LDR r2, = we_have_a_problem
-	MOV r3, 1
+	LDR r2, = we_have_a_problem 
+	MOV r3, 1 
 	STR r3, [r2] /*set we have a problem to 1 as specified by the lab*/
 	LDR r0, = quotient /* Set r0 to the mem location of the quotent as specified by the lab*/
 	B done
